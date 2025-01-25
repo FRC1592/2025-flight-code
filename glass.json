@@ -1,0 +1,60 @@
+{
+  "NetworkTables": {
+    "autonomous": {
+      "Speaker 2 Shot": {
+        "open": false,
+        "state": {
+          "open": false
+        }
+      },
+      "open": false
+    },
+    "components": {
+      "open": false,
+      "shooter": {
+        "open": false
+      },
+      "shooter_control": {
+        "open": false,
+        "state": {
+          "open": false
+        }
+      }
+    },
+    "robot": {
+      "open": false
+    },
+    "transitory": {
+      "SmartDashboard": {
+        "open": true
+      },
+      "autonomous": {
+        "Speaker 1 Shot": {
+          "open": false,
+          "state": {
+            "open": false
+          }
+        }
+      },
+      "components": {
+        "chassis": {
+          "open": true
+        },
+        "climber": {
+          "open": false
+        },
+        "climber_control": {
+          "open": false,
+          "state": {
+            "open": false
+          }
+        },
+        "open": true
+      }
+    },
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Autonomous Mode": "String Chooser"
+    }
+  }
+}

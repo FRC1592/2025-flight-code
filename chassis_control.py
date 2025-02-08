@@ -9,7 +9,6 @@ class ChassisControl(StateMachine):
     chassis : Chassis
     
     #Constants
-    zeroed_state = tunable([False] * 4)
     heading = tunable(0.0)
     p = tunable(0.01)
     i = tunable(0.0)
@@ -24,28 +23,12 @@ class ChassisControl(StateMachine):
         self._heading_pid.setIntegratorRange(-1.0, 1.0)
         
         #Sets up states and zeroed variables
-        self._zeroed = [True] * 4
         self._requested_state = None
         
         #Initializes joystick values
         self._forward : units.meters_per_second = 0
         self._left : units.meters_per_second = 0
         self._theta : units.radians_per_second = 0
-    
-    def quick_zeroed(self, pod : int):        
-        self._zeroed[0] = self.chassis.lf_home_state 
-        self._zeroed[1] = self.chassis.rf_home_state 
-        self._zeroed[2] = self.chassis.rb_home_state 
-        self._zeroed[3] = self.chassis.lb_home_state 
-        return self._zeroed[pod]
-    
-    #Checks if all pods are zeroed
-    def all_zeroed(self):        
-        self._zeroed[0] = self.chassis.lf_home_state 
-        self._zeroed[1] = self.chassis.rf_home_state 
-        self._zeroed[2] = self.chassis.rb_home_state 
-        self._zeroed[3] = self.chassis.lb_home_state 
-        return all(self._zeroed)
     
     #Requests a state
     def request_state(self, state):
@@ -77,44 +60,6 @@ class ChassisControl(StateMachine):
         self._forward = y * units.feet_per_second(21)
         self._left = x * units.feet_per_second(21)
         self.heading = t
-    
-    #States
-    #Zeroes the pods if requested
-    @state #(must_finish=True)
-    def zero(self):
-        for pod in self._zeroed:
-            self._zeroed[pod] = self.quick_zeroed(pod)
-        self.chassis.drive_field_relative(0, 0, 0)
-        self.next_state('zeroing')
-
-    #Zeroing the pods
-    @state #(must_finish=True)
-    def zeroing(self):
-        #Zeroes the pods
-        for i in range(4):
-            self._zeroed[i] = self._zeroed[i] | self.quick_zeroed(i)
-            self.zeroed_state = self._zeroed
-            #Rotates the pods to zero them
-            if not self.quick_zeroed(i):
-                self.chassis.rotate_velocity(i, 0.1)
-            else:
-                self.chassis.rotate_velocity(i, 0)
-
-            #If all pods are zeroed, move to the next state (zero encoders does nothing)
-            if all(self._zeroed):
-                self.next_state_now('zero_encoders')
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
-
-    #Dead function because I'm lazy
-    @state
-    def zero_encoders(self):
-        # self.chassis.zero_pod_encoders()
-        self.next_state_now('stop')
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
 
     #Stops the robot and moves to driving with joysticks
     @state

@@ -66,7 +66,6 @@ class ChassisControl(StateMachine):
     def stop(self):
         self.chassis.drive_field_relative(0, 0, 0)
         self.next_state('drive_with_joysticks')
-        # self.next_state('drive_gyro')
 
     #Drives with gyro/PID loop
     @state# (first=True)
@@ -80,7 +79,8 @@ class ChassisControl(StateMachine):
         theta = self._heading_pid.calculate(self.chassis.gyro_state)
         self.err = theta
         self.chassis.drive_field_relative(self._forward, self._left, theta)
-        # self.chassis.drive_field_relative(0, 0, theta)
+        
+        #If a state is requested, move to that state
         if self._requested_state is not None:
             self.next_state(self._requested_state)
 

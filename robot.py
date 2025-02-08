@@ -23,11 +23,10 @@ class MyRobot(magicbot.MagicRobot):
         self._j_driver : wpilib.XboxController = wpilib.XboxController(0)
         self._j_manip : wpilib.XboxController = wpilib.XboxController(1)
         
-        # Motors, encoders, and gyro
-        # self.gyro = navx.AHRS(wpilib.SPI.Port.kMXP)
+        # Motors and gyro
         self.gyro = navx.AHRS(navx.AHRS.NavXComType.kMXP_SPI)
         
-        #Establishes a pod with a drive motor (kraken/talon), turn motor (neo/sparkmax)
+        #Establishes a pod with a drive motor (kraken/talon) and turn motor (neo/sparkmax)
         #Pod 1 - Front Left
         self.f_lf_drive = hardware.TalonFX(0)
         self.s_lf_turn = rev.SparkMax(1, rev.SparkLowLevel.MotorType.kBrushless)
@@ -49,19 +48,19 @@ class MyRobot(magicbot.MagicRobot):
         #Zeros the gyro and sets the chassis control state to drive with joysticks
         self.chassis.zero_gyro()
         self.chassis_control.request_state('drive_with_joysticks')
+        #Sets the joystick inputs to zero to start
         self.chassis_control.update_joysticks(0, 0, 0)
 
-    # Robot periodic - setting up the chassis control state
+    # Robot periodic - setting up the controls/control states
     def teleopPeriodic(self):
+        #Initializes the chassis state
         chassis_state = None
         
-        #zeros field orientation
+        #Zeros field orientation
         if self._j_driver.getStartButton():
-            # self.chassis.zero_gyro()
-            self.chassis.rotate_velocity(0, 5)
+            self.chassis.zero_gyro()
 
-        #sets the chassis state to drive with joysticks
-        # print(str(chassis_state))
+        #Enables the chassis and starts driving with joysticks
         self.chassis_control.request_state(chassis_state)
         self.chassis_control.engage()
         self.chassis_control.update_joysticks(self._j_driver.getLeftX(), self._j_driver.getLeftY(), self._j_driver.getRightX())

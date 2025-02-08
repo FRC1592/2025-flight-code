@@ -46,7 +46,7 @@ class Chassis:
 
     #Initialization
     def __init__(self):
-        #Lists of motors, turns, and encoders
+        #Lists of drive/turn motors
         self._turns : List[rev.SparkMax]
         self._drives : List[phoenix6.hardware.TalonFX]
 
@@ -78,11 +78,10 @@ class Chassis:
 
     #Setup
     def setup(self):
-        #Lists of motors, turns, and encoders
+        #Lists of drive/turn motors
         self._drives = [self.f_lf_drive, self.f_rf_drive, self.f_lb_drive, self.f_rb_drive]
         self._turns = [self.s_lf_turn, self.s_rf_turn, self.s_lb_turn, self.s_rb_turn]
 
-        # self.zero_pod_encoders()
         self.configure_pods()
 
     #Configures pods/hardware
@@ -92,12 +91,7 @@ class Chassis:
         drive_cfg.open_loop_ramps = 0.25
         drive_cfg.current_limits = phoenix6.configs.CurrentLimitsConfigs.with_supply_current_limit_enable
 
-        # for drive, inv in zip(self._drives, [False, False, True, True]):
-        #     drive.configFactoryDefault()
-        #     drive.configAllSettings(drive_cfg)
-        #     drive.setInverted(inv)
-        #     drive.setNeutralMode(phoenix6.NeutralMode.Brake)
-
+        #Turn/sparkmax configuration
         for turn in self._turns:
             turn.IdleMode(rev.SparkMax.IdleMode.kBrake)
 
@@ -114,7 +108,6 @@ class Chassis:
                              forward : units.meters_per_second,
                              left : units.meters_per_second,
                              theta : float):
-        #SAVE: units.radians_per_second
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
             forward,
             left,
@@ -129,16 +122,13 @@ class Chassis:
         module_states = self._kinematics.toSwerveModuleStates(speeds)
         module_states = self._kinematics.desaturateWheelSpeeds(module_states, self._max_speed)
         
-        # for i in range(100):
-        #     print(self.get_pod_angle(0))
-        #     i = i + 1
-        # print(SwerveModuleState.optimize(module_states[0], self.get_pod_angle(0)))
-        
+        #Optimize module states
         module_states[0].optimize(self.get_pod_angle(0))
         module_states[1].optimize(self.get_pod_angle(1))
         module_states[2].optimize(self.get_pod_angle(2))
         module_states[3].optimize(self.get_pod_angle(3))
 
+        #Set pods
         self._set_pod(0, module_states[0])
         self._set_pod(1, module_states[1])
         self._set_pod(2, module_states[2])
@@ -154,29 +144,12 @@ class Chassis:
         drive_percent = command.speed / self._max_speed
         turn_radians = command.angle.radians()
 
+        #Sets the pod to the given speed and direction
         if abs(drive_percent) > self._min_drive_percent:
             self._turns[pod].getClosedLoopController().setReference(turn_radians, rev.SparkLowLevel.ControlType.kPosition)
         self._drives[pod].set(drive_percent)
-        
-        
-        # if pod == 0:
-        #     print("POD 1: " + str(units.radians_per_second(radians)))
-        # if pod == 1:
-        #     print("POD 2: " + str(units.radians_per_second(radians)))
-        # if pod == 2:
-        #     print("POD 3: " + str(units.radians_per_second(radians)))
-        # if pod == 3:
-        #     print("POD 4: " + str(units.radians_per_second(radians)))
-        
-        # if pod == 0:
-        #     print("POD 1: " + str(units.radians_per_second(radians)))
-        # if pod == 1:
-        #     print("POD 2: " + str(units.radians_per_second(radians)))
-        # if pod == 2:
-        #     print("POD 3: " + str(units.radians_per_second(radians)))
-        # if pod == 3:
-        #     print("POD 4: " + str(units.radians_per_second(radians)))
 
+    #Periodic function
     def execute(self):
         self._drive(self._speeds)
 

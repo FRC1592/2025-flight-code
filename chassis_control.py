@@ -45,9 +45,14 @@ class ChassisControl(StateMachine):
     #Updates joystick values
     def update_joysticks(self, x, y, z):
         #Exponential joystick input
-        x = self._joy_expo(x, 5)
-        y = self._joy_expo(y, 5)
+        x = self._joy_expo(x, 2)
+        y = self._joy_expo(y, 2)
         z = self._joy_expo(z, 5)
+        
+        mag = math.sqrt(x ** 2 + y ** 2)
+        if mag < 0.1:
+            x = 0
+            y = 0
 
         #Sets forward, left, and theta values
         self._forward = y * units.feet_per_second(21)

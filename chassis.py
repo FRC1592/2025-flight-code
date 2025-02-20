@@ -84,16 +84,25 @@ class Chassis:
 
         self.configure_pods()
 
+    # def degreed(self, radian):
+    #     return radian * 180 / math.pi
+
     #Configures pods/hardware
     def configure_pods(self):
         #Drive/kraken configuration
-        drive_cfg = phoenix6.configs.TalonFXConfiguration()
-        drive_cfg.open_loop_ramps = 0.25
-        drive_cfg.current_limits = phoenix6.configs.CurrentLimitsConfigs.with_supply_current_limit_enable
+        # drive_cfg = phoenix6.configs.TalonFXConfiguration()
+        # drive_cfg.open_loop_ramps = 0.25
+        # drive_cfg.current_limits = phoenix6.configs.CurrentLimitsConfigs.with_supply_current_limit_enable
+        
+        # for drive in self._drives:
+        #     drive.configurator.apply(drive_cfg)
 
         #Turn/sparkmax configuration
         for turn in self._turns:
             turn.IdleMode(rev.SparkMax.IdleMode.kBrake)
+            config = rev.SparkMaxConfig()
+            config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kAbsoluteEncoder)
+            turn.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
 
     #Zeroes the gyro/orientation
     def zero_gyro(self):
@@ -127,7 +136,7 @@ class Chassis:
         module_states[1].optimize(self.get_pod_angle(1))
         module_states[2].optimize(self.get_pod_angle(2))
         module_states[3].optimize(self.get_pod_angle(3))
-
+        
         #Set pods
         self._set_pod(0, module_states[0])
         self._set_pod(1, module_states[1])
@@ -142,7 +151,7 @@ class Chassis:
     #Sets a pod to a given speed and direction based on input
     def _set_pod(self, pod : int, command : SwerveModuleState):
         drive_percent = command.speed / self._max_speed
-        turn_radians = command.angle.radians()
+        turn_radians = command.angle.degrees()
 
         #Sets the pod to the given speed and direction
         if abs(drive_percent) > self._min_drive_percent:

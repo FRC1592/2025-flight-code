@@ -43,6 +43,23 @@ class MyRobot(magicbot.MagicRobot):
         self.f_rb_drive = hardware.TalonFX(6)
         self.s_rb_turn = rev.SparkMax(7, rev.SparkLowLevel.MotorType.kBrushless)
         
+        # #Lift Motors
+        # self.s_lift_left = rev.SparkMax(10, rev.SparkLowLevel.MotorType.kBrushless)
+        # self.s_lift_right = rev.SparkMax(11, rev.SparkLowLevel.MotorType.kBrushless)
+        
+        # #Arm Motors
+        # self.f_arm_tilt = hardware.TalonFX(20)
+        # self.s_arm_wrist = rev.SparkMax(21, rev.SparkLowLevel.MotorType.kBrushless)
+        # self.s_arm_gather = rev.SparkMax(22, rev.SparkLowLevel.MotorType.kBrushless)
+        
+        # #Claw Motors
+        # self.f_claw_tilt = hardware.TalonFX(30)
+        # self.s_claw_wrist = rev.SparkMax(31, rev.SparkLowLevel.MotorType.kBrushless)
+        
+        # #Cimber Motor
+        # self.s_climb = rev.SparkMax(40, rev.SparkLowLevel.MotorType.kBrushed)
+        # self.t_climb = hardware.TalonFX(40)
+        
     # Robot initialization - setting up the chassis
     def teleopInit(self):
         #Zeros the gyro and sets the chassis control state to drive with joysticks

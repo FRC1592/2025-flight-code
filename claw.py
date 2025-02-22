@@ -1,50 +1,45 @@
-# from wpimath import units
-# import wpilib
-# import phoenix5
-# from magicbot import tunable
+from wpimath import units
+import phoenix6
+from magicbot import tunable
+import rev
 
 
-# class Claw:
-#     f_gather_tilt : phoenix5.WPI_TalonFX
-#     t_gather : phoenix5.WPI_TalonSRX
-#     d_gather_break : wpilib.DigitalInput
+class Claw:
+    f_claw_wrist : phoenix6.hardware.TalonFX
+    s_claw_gather : rev.SparkMax
 
-#     tilt_state = tunable(0.0)
+    claw_state = tunable(0.0)
 
-#     tilt_cmd = tunable(0.0)
-#     gather_cmd = tunable(0.0)
+    wrist_cmd = tunable(0.0)
+    gather_cmd = tunable(0.0)
 
-#     def setup(self):
-#         self._deg2cnt = 2048 * 112 / units.degrees(360)
-#         tilt_cfg = phoenix5.TalonFXConfiguration()
-#         tilt_cfg.slot0.kP = 0.1
-#         tilt_cfg.slot0.kI = 0.0
-#         tilt_cfg.slot0.kD = 0.0
-#         # tilt_cfg.motionCruiseVelocity = 10
-#         self.f_gather_tilt.configFactoryDefault()
-#         self.f_gather_tilt.configAllSettings(tilt_cfg)
-#         self.f_gather_tilt.setInverted(True)
+    def setup(self):
+        # self._deg2cnt = 2048 * 112 / units.degrees(360)
+        wrist_cfg = phoenix6.configs.Slot0Configs()
+        wrist_cfg.k_p = 0.1
+        wrist_cfg.k_i = 0.0
+        wrist_cfg.k_d = 0.0
+        
+        config = rev.SparkMaxConfig()
+        self.s_claw_gather.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
 
-#     def execute(self):
-#         self.tilt_state = self.f_gather_tilt.getSelectedSensorPosition() / self._deg2cnt
-#         self.f_gather_tilt.set(phoenix5.ControlMode.Position, self.tilt_cmd * self._deg2cnt)
-#         self.t_gather.set(phoenix5.ControlMode.PercentOutput, self.gather_cmd)
+    def execute(self):
+        # self.arm_state = self.f_gather_tilt.getSelectedSensorPosition() / self._deg2cnt
+        # self.f_gather_tilt.set(phoenix5.ControlMode.Position, self.tilt_cmd * self._deg2cnt)
+        self.s_claw_gather.set(self.gather_cmd)
 
-#     def tilt(self, angle : units.degrees):
-#         self.tilt_cmd = angle
+    def wrist(self, angle : units.degrees):
+        self.wrist_cmd = angle
 
-#     def gather(self):
-#         self.gather_cmd = 0.7
+    def gather(self):
+        self.gather_cmd = 0.3
 
-#     def eject(self):
-#         self.gather_cmd = -1.0
+    def eject(self):
+        self.gather_cmd = -0.3
 
-#     def stop(self):
-#         self.gather_cmd = 0.0
+    def stop(self):
+        self.gather_cmd = 0.0
 
-#     def tilted(self):
-#         max_err = units.degrees(5) * self._deg2cnt
-#         return abs(self.f_gather_tilt.getSelectedSensorPosition() - self.tilt_cmd * self._deg2cnt) < max_err
-
-#     def gathered(self):
-#         return not self.d_gather_break.get()
+    # def tilted(self):
+    #     max_err = units.degrees(5) * self._deg2cnt
+    #     return abs(self.f_gather_tilt.getSelectedSensorPosition() - self.tilt_cmd * self._deg2cnt) < max_err

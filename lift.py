@@ -10,22 +10,25 @@ class Lift:
     lift_state = tunable(0.0)
 
     lift_cmd = tunable(0.0)
+    
+    max_lift = tunable(50.0)
 
     def setup(self):
-        # self._deg2cnt = 2048 * 112 / units.degrees(360)
-        
-        config = rev.SparkMaxConfig()
-        self.s_lift_left.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
-        self.s_lift_right.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
+        self.s_lift_left.setInverted(True)
+        self.s_lift_right.setInverted(False)
+    
+        self._inch2rev = 9 / 4.5
 
     def execute(self):
-        pass
-        # self.arm_state = self.f_gather_tilt.getSelectedSensorPosition() / self._deg2cnt
-        # self.f_gather_tilt.set(phoenix5.ControlMode.Position, self.tilt_cmd * self._deg2cnt)
+        self.lift_state = ((self.s_lift_left.getEncoder().getPosition() / self._inch2rev) + (self.s_lift_right.getEncoder().getPosition() / self._inch2rev)) / 2
+        
+        self.s_lift_left.getClosedLoopController().setReference(self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
+        self.s_lift_right.getClosedLoopController().setReference(self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
 
-    def lift(self, angle : units.degrees):
-        self.tilt_cmd = angle
+    def lift(self, height : units.inches):
+        if height <= self.max_lift:
+            self.lift_cmd = height
 
-    # def tilted(self):
-    #     max_err = units.degrees(5) * self._deg2cnt
-    #     return abs(self.f_gather_tilt.getSelectedSensorPosition() - self.tilt_cmd * self._deg2cnt) < max_err
+    def lifted(self):
+        max_err = units.inches(1) * self._inch2rev
+        return abs(self.s_lift_left.getEncoder().getPosition() - self.lift_cmd * self._inch2rev) < max_err and abs(self.s_lift_right.getEncoder().getPosition() - self.lift_cmd * self._inch2rev) < max_err

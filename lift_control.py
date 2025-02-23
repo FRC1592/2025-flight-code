@@ -105,7 +105,7 @@ class LiftControl(StateMachine):
             self.next_state('stop')
             
     @state
-    def store_algae(self):
+    def stow_claw(self):
         self.claw.wrist(0)
 
         if self._requested_state == 'stop':

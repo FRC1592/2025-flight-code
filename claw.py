@@ -1,11 +1,11 @@
 from wpimath import units
-import phoenix6
 from magicbot import tunable
 import rev
+import math
 
 
 class Claw:
-    f_claw_wrist : phoenix6.hardware.TalonFX
+    s_claw_wrist : rev.SparkMax
     s_claw_gather : rev.SparkMax
 
     wrist_state = tunable(0.0)
@@ -16,22 +16,21 @@ class Claw:
     wrist_limit = 190
 
     def setup(self):
-        # WHAT IS THE GEAR RATIO KYLE
-        self._deg2rev = 60 / units.degrees(360)
-        wrist_cfg = phoenix6.configs.Slot0Configs()
-        wrist_cfg.k_p = 0.1
-        wrist_cfg.k_i = 0.0
-        wrist_cfg.k_d = 0.0
+        self.s_claw_wrist.IdleMode(rev.SparkMax.IdleMode.kBrake)
+        config = rev.SparkMaxConfig()
+        config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kPrimaryEncoder)
+        self.s_claw_wrist.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
+        self._rad2rev = 77 / units.radians(2 * math.pi)
 
     def execute(self):
-        self.wrist_state = self.f_claw_wrist.get_position() / self._deg2rev
-        self.f_claw_wrist.set_position(self.wrist_cmd * self._deg2rev)
+        self.wrist_state = self.s_claw_wrist.getEncoder().getPosition() / self._rad2rev
+        self.s_claw_wrist.getClosedLoopController().setReference(self.wrist_cmd * self._rad2rev, rev.SparkLowLevel.ControlType.kPosition)
         
         self.s_claw_gather.set(self.gather_cmd)
 
     def wrist(self, angle : units.degrees):
         if angle <= self.wrist_limit:
-            self.wrist_cmd = angle
+            self.wrist_cmd = math.radians(angle)
 
     def gather(self):
         self.gather_cmd = 0.3
@@ -43,5 +42,5 @@ class Claw:
         self.gather_cmd = 0.0
 
     def wristed(self):
-        max_err = units.degrees(5) * self._deg2rev
-        return abs(self.f_claw_wrist.get_position() - self.wrist_cmd * self._deg2rev) < max_err
+        max_err = units.radians(0.087) * self._rad2rev
+        return abs(self.s_claw_wrist.getEncoder().getPosition() - self.wrist_cmd * self._rad2rev) < max_err

@@ -152,10 +152,12 @@ class Chassis:
     def _set_pod(self, pod : int, command : SwerveModuleState):
         drive_percent = command.speed / self._max_speed
         turn_radians = command.angle.degrees()
+        # print(str(turn_radians))
 
         #Sets the pod to the given speed and direction
         if abs(drive_percent) > self._min_drive_percent:
             self._turns[pod].getClosedLoopController().setReference(turn_radians, rev.SparkLowLevel.ControlType.kPosition)
+            print('AHHHHHHHH')
         self._drives[pod].set(drive_percent)
 
     #Periodic function

@@ -47,17 +47,18 @@ class MyRobot(magicbot.MagicRobot):
         self.s_lift_right = rev.SparkMax(11, rev.SparkLowLevel.MotorType.kBrushless)
         
         #Arm Motors
-        self.f_arm_tilt = hardware.TalonFX(20)
+        self.s_arm_tilt = rev.SparkMax(20, rev.SparkLowLevel.MotorType.kBrushless)
         self.s_arm_wrist = rev.SparkMax(21, rev.SparkLowLevel.MotorType.kBrushless)
         self.s_arm_gather = rev.SparkMax(22, rev.SparkLowLevel.MotorType.kBrushless)
         
         # #Claw Motors
-        self.f_claw_wrist = hardware.TalonFX(30)
+        self.s_claw_wrist = rev.SparkMax(30, rev.SparkLowLevel.MotorType.kBrushless)
         self.s_claw_gather = rev.SparkMax(31, rev.SparkLowLevel.MotorType.kBrushless)
         
         # #Cimber Motor
-        # self.s_climb = rev.SparkMax(40, rev.SparkLowLevel.MotorType.kBrushed)
-        # self.t_climb = hardware.TalonFX(40)
+        self.r_lock = wpilib.Relay(0)
+        self.s_climb = rev.SparkMax(40, rev.SparkLowLevel.MotorType.kBrushed)
+        self.d_home = wpilib.DigitalInput(0)
         
     def teleopInit(self):
         #Chassis

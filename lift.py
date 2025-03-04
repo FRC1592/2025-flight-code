@@ -14,9 +14,6 @@ class Lift:
     max_lift = tunable(50.0)
 
     def setup(self):
-        self.s_lift_left.setInverted(True)
-        self.s_lift_right.setInverted(False)
-        
         self.s_lift_left.IdleMode(rev.SparkMax.IdleMode.kBrake)
         self.s_lift_right.IdleMode(rev.SparkMax.IdleMode.kBrake)
         
@@ -25,12 +22,12 @@ class Lift:
         self.s_lift_left.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self.s_lift_right.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
     
-        self._inch2rev = 9 / 4.5
+        self._inch2rev = 9 / units.inches(1)
 
     def execute(self):
-        # self.lift_state = ((self.s_lift_left.getEncoder().getPosition() / self._inch2rev) + (self.s_lift_right.getEncoder().getPosition() / self._inch2rev)) / 2
+        self.lift_state = ((self.s_lift_left.getEncoder().getPosition() / self._inch2rev) + (self.s_lift_right.getEncoder().getPosition() / self._inch2rev)) / 2
         
-        self.s_lift_left.getClosedLoopController().setReference(self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
+        self.s_lift_left.getClosedLoopController().setReference(-self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
         self.s_lift_right.getClosedLoopController().setReference(self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
 
     def lift(self, height : units.inches):

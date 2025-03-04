@@ -15,79 +15,82 @@ class LiftControl(StateMachine):
 
     def request_state(self, state):
         self._requested_state = state
+    
+    def zeroed(self):
+        return self.lift.lifted() and self.arm.tilted() and self.arm.wristed() and self.claw.wristed()
 
-    @state
+    @state 
     def stow_pos(self):
         self.lift.lift(0)
         self.arm.tilt(0)
         self.arm.wrist(0)
         self.claw.wrist(0)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
 
     @state
     def floor_pos(self):
         self.lift.lift(0)
         self.arm.tilt(0)
         self.arm.wrist(0)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
     
     @state
     def processor_pos(self):
         self.lift.lift(10)
         self.arm.tilt(0)
         self.arm.wrist(0)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
     
     @state
     def gather_pos(self):
         self.lift.lift(20)
         self.arm.tilt(10)
         self.arm.wrist(0)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
 
     @state
     def trough_pos(self):
         self.lift.lift(0)
         self.arm.tilt(0)
         self.arm.wrist(60)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
             
     @state
     def low_pos(self):
         self.lift.lift(20)
         self.arm.tilt(0)
         self.arm.wrist(60)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
             
     @state
     def med_pos(self):
         self.lift.lift(35)
         self.arm.tilt(0)
         self.arm.wrist(60)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
     
     @state
     def high_pos(self):
         self.lift.lift(50)
         self.arm.tilt(15)
         self.arm.wrist(75)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
 
     @state
     def gather_coral(self):
@@ -107,9 +110,9 @@ class LiftControl(StateMachine):
     @state
     def stow_claw(self):
         self.claw.wrist(0)
-
-        if self._requested_state == 'stop':
-            self.next_state('stop')
+        
+        if self.zeroed():
+            self.next_state('idle')
     
     @state
     def eject_coral(self):

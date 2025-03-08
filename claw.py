@@ -18,9 +18,13 @@ class Claw:
     def setup(self):
         self.s_claw_wrist.IdleMode(rev.SparkMax.IdleMode.kBrake)
         config = rev.SparkMaxConfig()
+        config.smartCurrentLimit(20)
+        self.s_claw_gather.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kPrimaryEncoder)
         self.s_claw_wrist.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self._rad2rev = 77 / units.radians(2 * math.pi)
+        
+        
 
     def execute(self):
         self.wrist_state = self.s_claw_wrist.getEncoder().getPosition() / self._rad2rev

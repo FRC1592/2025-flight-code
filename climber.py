@@ -27,6 +27,7 @@ class Climber:
     def setup(self):
         self.s_climb.IdleMode(rev.SparkMax.IdleMode.kBrake)
         config = rev.SparkMaxConfig()
+        config.smartCurrentLimit(20)
         config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kAlternateOrExternalEncoder)
         self.s_climb.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
 
@@ -41,6 +42,7 @@ class Climber:
         else:
             self.s_climb.set(self.climb_cmd)
 
+        self.home_state = not self.d_home.get()
         self.climb_state = self.s_climb.getAlternateEncoder().getPosition() / self._in2cnt
 
     def stop(self):

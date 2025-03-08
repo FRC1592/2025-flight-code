@@ -23,6 +23,8 @@ class Arm:
         self.s_arm_tilt.IdleMode(rev.SparkMax.IdleMode.kBrake)
         self.s_arm_wrist.IdleMode(rev.SparkMax.IdleMode.kBrake)
         config = rev.SparkMaxConfig()
+        config.smartCurrentLimit(20)
+        self.s_arm_gather.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kPrimaryEncoder)
         self.s_arm_tilt.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self.s_arm_wrist.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)

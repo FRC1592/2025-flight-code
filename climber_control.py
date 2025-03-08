@@ -17,7 +17,7 @@ class ClimberControl(StateMachine):
     def home(self):
         homed = self.climber.climb_home()
 
-        self.climber.set_climb(0 if homed else -1.0)
+        self.climber.set_climb(0 if homed else -0.1)
 
         if homed:
             self.climber.home_climb()

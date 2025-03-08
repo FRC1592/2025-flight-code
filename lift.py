@@ -19,16 +19,17 @@ class Lift:
         
         config = rev.SparkMaxConfig()
         config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kPrimaryEncoder)
+        config.smartCurrentLimit(40)
         self.s_lift_left.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self.s_lift_right.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
     
-        self._inch2rev = 9 / units.inches(1)
+        self._inch2rev = 9 / units.inches(8)
 
     def execute(self):
         self.lift_state = ((self.s_lift_left.getEncoder().getPosition() / self._inch2rev) + (self.s_lift_right.getEncoder().getPosition() / self._inch2rev)) / 2
         
-        self.s_lift_left.getClosedLoopController().setReference(-self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
-        self.s_lift_right.getClosedLoopController().setReference(self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
+        self.s_lift_left.getClosedLoopController().setReference(self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
+        self.s_lift_right.getClosedLoopController().setReference(-self.lift_cmd * self._inch2rev, rev.SparkLowLevel.ControlType.kPosition)
 
     def lift(self, height : units.inches):
         if height <= self.max_lift:

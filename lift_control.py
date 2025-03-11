@@ -10,6 +10,8 @@ class LiftControl(StateMachine):
     arm : Arm
     claw : Claw
 
+    plz_daddy = tunable(31.0)
+
     def __init__(self):
         self._requested_state = None
 
@@ -17,7 +19,7 @@ class LiftControl(StateMachine):
         self._requested_state = state
     
     def zeroed(self):
-        return self.lift.lifted() and self.arm.tilted() and self.arm.wristed() and self.claw.wristed()
+        return self.arm.tilted() and self.arm.wristed() and self.claw.wristed()
 
     @state 
     def stow_pos(self):
@@ -29,29 +31,70 @@ class LiftControl(StateMachine):
         if self.zeroed():
             self.next_state('idle')
 
-    @state
+    @timed_state(duration=0.5, next_state='claw_prep')
     def floor_pos(self):
-        self.lift.lift(0)
+        self.lift.lift(20)
         self.arm.tilt(0)
         self.arm.wrist(0)
+        self.claw.wrist(90)
+    
+    @timed_state(duration=0.8, next_state='lower_claw')
+    def claw_prep(self):
+        self.lift.lift(20)
+        self.claw.wrist(200)
+        
+    @state
+    def lower_claw(self):
+        self.lift.lift(9.5)
+        self.claw.wrist(200)
         
         if self.zeroed():
             self.next_state('idle')
+            
+    @timed_state(duration=0.8, next_state='flow_two')
+    def scoop_algae(self):
+        self.lift.lift(20)
+        self.claw.wrist(185)
+    
+    # @timed_state(duration=0.5, next_state='flow_two')
+    # def flow_one(self):
+    #     self.lift.lift(20)
+    #     self.claw.wrist(180)
+        
+    @timed_state(duration=0.8, next_state='flow_three')
+    def flow_two(self):
+        self.lift.lift(18)
+        self.claw.wrist(65)
+        
+    @timed_state(duration=1.0, next_state='processor_pos')
+    def flow_three(self):
+        self.lift.lift(18)
+        self.claw.wrist(100)
     
     @state
     def processor_pos(self):
-        self.lift.lift(10)
+        self.lift.lift(8)
         self.arm.tilt(0)
         self.arm.wrist(0)
+        self.claw.wrist(121)
+        
+        if self.zeroed():
+            self.next_state('idle')
+            
+    @state
+    def flick_algae(self):
+        self.lift.lift(20)
+        self.claw.wrist(150)
         
         if self.zeroed():
             self.next_state('idle')
     
     @state
     def gather_pos(self):
-        self.lift.lift(20)
-        self.arm.tilt(10)
-        self.arm.wrist(0)
+        self.lift.lift(4)
+        self.arm.tilt(17)
+        self.arm.wrist(-45)
+        self.claw.wrist(0)
         
         if self.zeroed():
             self.next_state('idle')
@@ -59,35 +102,58 @@ class LiftControl(StateMachine):
     @state
     def trough_pos(self):
         self.lift.lift(0)
-        self.arm.tilt(0)
-        self.arm.wrist(60)
+        self.arm.tilt(55)
+        self.arm.wrist(-55)
         
         if self.zeroed():
             self.next_state('idle')
             
     @state
     def low_pos(self):
-        self.lift.lift(20)
+        self.lift.lift(5)
         self.arm.tilt(0)
-        self.arm.wrist(60)
+        self.arm.wrist(20)
         
         if self.zeroed():
             self.next_state('idle')
             
     @state
     def med_pos(self):
-        self.lift.lift(35)
+        self.lift.lift(20)
         self.arm.tilt(0)
-        self.arm.wrist(60)
+        self.arm.wrist(22)
+        self.claw.wrist(94)
         
         if self.zeroed():
             self.next_state('idle')
     
+    @timed_state(duration=0.3, next_state='wunadeez')
+    def high_eject(self):
+        self.arm.eject()
+    
+    @timed_state(duration=0.1, next_state='wunadoz')
+    def wunadeez(self):
+        self.arm.wrist(27)
+    
+    @timed_state(duration=0.3, next_state='wunadat')
+    def wunadoz(self):
+        self.arm.wrist(20)
+    
+    @state
+    def wunadat(self):
+        self.arm.wrist(0)
+        self.arm.stop()
+        
+        if self.zeroed():
+            self.next_state('idle')
+
+    
     @state
     def high_pos(self):
-        self.lift.lift(50)
-        self.arm.tilt(15)
-        self.arm.wrist(75)
+        self.lift.lift(46)
+        self.arm.tilt(0)
+        self.arm.wrist(32)
+        self.claw.wrist(150)
         
         if self.zeroed():
             self.next_state('idle')
@@ -101,7 +167,7 @@ class LiftControl(StateMachine):
             
     @state
     def gather_algae(self):
-        self.claw.wrist(90)
+        # self.claw.wrist(90)
         self.claw.gather()
 
         if self._requested_state == 'stop':

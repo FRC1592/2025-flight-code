@@ -25,6 +25,9 @@ class MyRobot(magicbot.MagicRobot):
     chassis_control : ChassisControl
     lift_control : LiftControl
     climber_control : ClimberControl
+    
+    holding = False
+    clinging = False
 
     def createObjects(self):
         self._j_driver : wpilib.XboxController = wpilib.XboxController(0)
@@ -91,30 +94,42 @@ class MyRobot(magicbot.MagicRobot):
         climber_state = None
         
         #Driver Controls
-        if self._j_driver.getAButton():
-            lift_state = 'floor_pos'
-        if self._j_driver.getBButton():
-            lift_state = 'processor_pos'
+        if self._j_driver.getAButtonPressed():
+            lift_state = 'gather_coral'
+        if self._j_driver.getAButtonReleased():
+            lift_state = 'stop'
+            
+        if self._j_driver.getBButtonPressed():
+            lift_state = 'eject_coral'
+        if self._j_driver.getBButtonReleased():
+            lift_state = 'stop'
+            
         if self._j_driver.getXButton():
-            lift_state = 'gather_pos'
+            lift_state = 'stow_claw'
+            
         if self._j_driver.getYButton():
-            lift_state = 'stow_pos'
-            
+            lift_state = 'scoop_algae'
+        
+        if self._j_driver.getRightBumper():
+            lift_state = 'floor_pos'
         if self._j_driver.getRightTriggerAxis() > 0.5:
-            if self.lift_control.current_state == 'idle':
-                lift_state = 'eject_algae'
+            self.claw.gather()
+            self.clinging = True
         if self._j_driver.getRightTriggerAxis() < 0.5:
-            if self.lift_control.current_state == 'eject_algae':
-                lift_state = 'stop'
+            if self.clinging:
+                self.claw.stop()
+                self.clinging = False
 
-        if self._j_driver.getLeftBumperPressed():
+        if self._j_driver.getBackButton():
+            lift_state = 'high_eject'
+
+        if self._j_driver.getLeftTriggerAxis() > 0.5:
             climber_state = 'home'
-        if self._j_driver.getLeftBumperReleased():
+        if self._j_driver.getLeftTriggerAxis() < 0.5:
             climber_state = 'stop'
-            
-        if self._j_driver.getRightBumperPressed():
+        if self._j_driver.getLeftBumperPressed():
             climber_state = 'extend'
-        if self._j_driver.getRightBumperReleased():
+        if self._j_driver.getLeftBumperReleased():
             climber_state = 'stop'
 
         #Manipulator Controls
@@ -127,27 +142,25 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_manip.getYButton():
             lift_state = 'high_pos'
         
-        if self._j_manip.getLeftBumperPressed():
-            lift_state = 'gather_algae'
-        if self._j_manip.getLeftBumperReleased():
-            lift_state = 'stop'
-        
+        if self._j_manip.getLeftBumper():
+            lift_state = 'stow_pos'
         if self._j_manip.getRightBumper():
-            lift_state = 'stow_claw'
+            lift_state = 'gather_pos'
         
         if self._j_manip.getLeftTriggerAxis() > 0.5:
             if self.lift_control.current_state == 'idle':
-                lift_state = 'gather_coral'
-        if self._j_manip.getLeftTriggerAxis() < 0.5:
-            if self.lift_control.current_state == 'gather_coral':
-                lift_state = 'stop'
+                lift_state = 'processor_pos'
         
         if self._j_manip.getRightTriggerAxis() > 0.5:
-            if self.lift_control.current_state == 'idle':
-                lift_state = 'eject_coral'
+            self.claw.hold()
+            self.holding = True
         if self._j_manip.getRightTriggerAxis() < 0.5:
-            if self.lift_control.current_state == 'eject_coral':
-                lift_state = 'stop'
+            if self.holding:
+                self.claw.stop()
+                self.holding = False
+                
+        if self._j_manip.getStartButton():
+            lift_state = 'flick_algae'
 
         self.lift_control.request_state(lift_state)
         self.climber_control.request_state(climber_state)

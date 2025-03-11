@@ -15,33 +15,27 @@ class ClimberControl(StateMachine):
 
     @state
     def home(self):
-        homed = self.climber.climb_home()
-
-        self.climber.set_climb(0 if homed else -0.1)
-
-        if homed:
-            self.climber.home_climb()
-        if homed or self._requested_state == 'stop':
+        self.climber.set_climb(1.0)
+        if self._requested_state == 'stop':
             self.next_state('stop')
 
     @timed_state(duration=0.1, next_state='extend_bump')
     def extend(self):
         self.climber.release_extend()
-
+        
         if self._requested_state == 'stop':
             self.next_state('stop')
 
     @timed_state(duration=0.1, next_state='do_extend')
     def extend_bump(self):
-        self.climber.set_climb(-0.5)
+        self.climber.set_climb(0.1)
 
         if self._requested_state == 'stop':
             self.next_state('stop')
 
     @state()
     def do_extend(self):
-        self.climber.start_extend()
-        self.climber.set_climb(0.1)
+        self.climber.set_climb(-1.0)
 
         if self._requested_state == 'stop':
             self.next_state('stop')

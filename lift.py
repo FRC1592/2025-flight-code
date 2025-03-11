@@ -11,7 +11,7 @@ class Lift:
 
     lift_cmd = tunable(0.0)
     
-    max_lift = tunable(50.0)
+    max_lift = tunable(46.5)
 
     def setup(self):
         self.s_lift_left.IdleMode(rev.SparkMax.IdleMode.kBrake)
@@ -23,7 +23,7 @@ class Lift:
         self.s_lift_left.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self.s_lift_right.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
     
-        self._inch2rev = 9 / units.inches(8)
+        self._inch2rev = 9 / units.inches(6.75)
 
     def execute(self):
         self.lift_state = ((self.s_lift_left.getEncoder().getPosition() / self._inch2rev) + (self.s_lift_right.getEncoder().getPosition() / self._inch2rev)) / 2
@@ -37,4 +37,4 @@ class Lift:
 
     def lifted(self):
         max_err = units.inches(1) * self._inch2rev
-        return abs(self.s_lift_left.getEncoder().getPosition() - self.lift_cmd * self._inch2rev) < max_err and abs(self.s_lift_right.getEncoder().getPosition() - self.lift_cmd * self._inch2rev) < max_err
+        return self.lift_state < max_err

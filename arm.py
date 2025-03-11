@@ -29,7 +29,7 @@ class Arm:
         self.s_arm_tilt.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self.s_arm_wrist.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         
-        self.t_rad2rev = 180 / units.radians(2 * math.pi)
+        self.t_rad2rev = 120 / units.radians(2 * math.pi)
         self.w_rad2rev = 50 / units.radians(2 * math.pi)
 
     def execute(self):
@@ -50,10 +50,10 @@ class Arm:
             self.wrist_cmd = math.radians(angle)
 
     def gather(self):
-        self.gather_cmd = 0.3
+        self.gather_cmd = 1.0
 
     def eject(self):
-        self.gather_cmd = -0.3
+        self.gather_cmd = -1.0
 
     def stop(self):
         self.gather_cmd = 0.0

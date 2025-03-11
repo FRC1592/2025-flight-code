@@ -13,7 +13,7 @@ class Claw:
     wrist_cmd = tunable(0.0)
     gather_cmd = tunable(0.0)
     
-    wrist_limit = 190
+    wrist_limit = 220
 
     def setup(self):
         self.s_claw_wrist.IdleMode(rev.SparkMax.IdleMode.kBrake)
@@ -22,7 +22,7 @@ class Claw:
         self.s_claw_gather.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kPrimaryEncoder)
         self.s_claw_wrist.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
-        self._rad2rev = 77 / units.radians(2 * math.pi)
+        self._rad2rev = 80 / units.radians(2 * math.pi)
         
         
 
@@ -37,10 +37,13 @@ class Claw:
             self.wrist_cmd = math.radians(angle)
 
     def gather(self):
-        self.gather_cmd = 0.3
+        self.gather_cmd = 0.75
 
     def eject(self):
-        self.gather_cmd = -0.3
+        self.gather_cmd = -0.75
+        
+    def hold(self):
+        self.gather_cmd = 0.5
 
     def stop(self):
         self.gather_cmd = 0.0

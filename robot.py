@@ -28,6 +28,7 @@ class MyRobot(magicbot.MagicRobot):
     
     holding = False
     clinging = False
+    extending = False
 
     def createObjects(self):
         self._j_driver : wpilib.XboxController = wpilib.XboxController(0)
@@ -69,9 +70,9 @@ class MyRobot(magicbot.MagicRobot):
         self.s_climb = rev.SparkMax(40, rev.SparkLowLevel.MotorType.kBrushed)
         self.d_home = wpilib.DigitalInput(0)
         
-        # self.automodes = AutonomousModeSelector("autonomous")
+        self.automodes = AutonomousModeSelector("autonomous")
 
-        # self.nt = ntcore.NetworkTableInstance.getDefault().getTable('limelight')
+        self.nt = ntcore.NetworkTableInstance.getDefault().getTable('limelight')
         
     def teleopInit(self):
         #Chassis
@@ -126,11 +127,14 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_driver.getLeftTriggerAxis() > 0.5:
             climber_state = 'home'
         if self._j_driver.getLeftTriggerAxis() < 0.5:
-            climber_state = 'stop'
+            if not self.extending:
+                climber_state = 'stop'
         if self._j_driver.getLeftBumperPressed():
             climber_state = 'extend'
+            self.extending = True
         if self._j_driver.getLeftBumperReleased():
             climber_state = 'stop'
+            self.extending = False
 
         #Manipulator Controls
         if self._j_manip.getAButton():
@@ -142,8 +146,6 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_manip.getYButton():
             lift_state = 'high_pos'
         
-        if self._j_manip.getLeftBumper():
-            lift_state = 'stow_pos'
         if self._j_manip.getRightBumper():
             lift_state = 'gather_pos'
         
@@ -159,6 +161,8 @@ class MyRobot(magicbot.MagicRobot):
                 self.claw.stop()
                 self.holding = False
                 
+        if self._j_manip.getBackButton():
+            lift_state = 'stow_pos'
         if self._j_manip.getStartButton():
             lift_state = 'flick_algae'
 

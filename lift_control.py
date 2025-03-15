@@ -41,12 +41,12 @@ class LiftControl(StateMachine):
     @timed_state(duration=0.8, next_state='lower_claw')
     def claw_prep(self):
         self.lift.lift(20)
-        self.claw.wrist(200)
+        self.claw.wrist(180)
         
     @state
     def lower_claw(self):
         self.lift.lift(9.5)
-        self.claw.wrist(200)
+        self.claw.wrist(180)
         
         if self.zeroed():
             self.next_state('idle')
@@ -119,10 +119,10 @@ class LiftControl(StateMachine):
             
     @state
     def med_pos(self):
-        self.lift.lift(20)
+        self.lift.lift(18)
         self.arm.tilt(0)
         self.arm.wrist(22)
-        self.claw.wrist(94)
+        self.claw.wrist(70)
         
         if self.zeroed():
             self.next_state('idle')
@@ -133,11 +133,11 @@ class LiftControl(StateMachine):
     
     @timed_state(duration=0.1, next_state='wunadoz')
     def wunadeez(self):
-        self.arm.wrist(27)
+        self.arm.wrist(29)
     
     @timed_state(duration=0.3, next_state='wunadat')
     def wunadoz(self):
-        self.arm.wrist(20)
+        self.arm.wrist(22)
     
     @state
     def wunadat(self):
@@ -147,13 +147,12 @@ class LiftControl(StateMachine):
         if self.zeroed():
             self.next_state('idle')
 
-    
     @state
     def high_pos(self):
         self.lift.lift(46)
         self.arm.tilt(0)
-        self.arm.wrist(32)
-        self.claw.wrist(150)
+        self.arm.wrist(34)
+        self.claw.wrist(170)
         
         if self.zeroed():
             self.next_state('idle')

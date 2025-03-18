@@ -6,23 +6,28 @@ from chassis_control import ChassisControl
 from lift_control import LiftControl
 from climber_control import ClimberControl
 from vision import Vision
+from april_constants import AprilConstants
+from chassis import Chassis
 
 
-class SendIt(AutonomousStateMachine):
-    MODE_NAME = 'Send It'
+class LittleLeave(AutonomousStateMachine):
+    MODE_NAME = 'Little Leave'
 
     chassis_control : ChassisControl
     lift_control : LiftControl
     climber_control : ClimberControl
     vision : Vision
+    april_constants : AprilConstants
+    chassis : Chassis
 
     def initialize(self):
+        self.chassis.zero_gyro()
         self.chassis_control.request_state('drive_gyro')
 
-    @timed_state(duration=1.0, next_state='stop', first=True)
-    def start_turn(self):
+    @timed_state(duration=3.0, next_state='stop', first = True)
+    def leave(self):
         self.chassis_control.request_state('drive_gyro')
-        self.chassis_control.drive_dm(0, 1.0, 0, 1)
+        self.chassis_control.drive_df(0, -7, 0, 3.0)
 
     @state
     def stop(self):

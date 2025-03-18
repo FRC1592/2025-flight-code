@@ -95,7 +95,7 @@ class Chassis:
 
     def zero_gyro(self):
         self.gyro.zeroYaw()
-        self.gyro.setAngleAdjustment(180)
+        # self.gyro.setAngleAdjustment(180)
     
     def get_gyro(self) -> Rotation2d:
         return Rotation2d.fromDegrees(-self.gyro.getAngle())

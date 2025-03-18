@@ -6,24 +6,28 @@ from chassis_control import ChassisControl
 from lift_control import LiftControl
 from climber_control import ClimberControl
 from vision import Vision
+from april_constants import AprilConstants
+from chassis import Chassis
 
 
-class TurnToTag(AutonomousStateMachine):
-    MODE_NAME = 'Turn to Tag'
+class LargeLeave(AutonomousStateMachine):
+    MODE_NAME = 'Large Leave'
 
     chassis_control : ChassisControl
     lift_control : LiftControl
     climber_control : ClimberControl
     vision : Vision
+    april_constants : AprilConstants
+    chassis : Chassis
 
     def initialize(self):
+        self.chassis.zero_gyro()
         self.chassis_control.request_state('drive_gyro')
 
-    @state(first=True)
-    def start_turn(self):
-        self.chassis_control.update_joysticks(0, 0, 0.2)
-        if self.vision.foundTag(7):
-            self.next_state('stop')
+    @timed_state(duration=6.0, next_state='stop', first = True)
+    def leave(self):
+        self.chassis_control.request_state('drive_gyro')
+        self.chassis_control.drive_df(0, -20, 0, 6.0)
 
     @state
     def stop(self):

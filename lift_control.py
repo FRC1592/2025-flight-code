@@ -102,8 +102,8 @@ class LiftControl(StateMachine):
     @state
     def trough_pos(self):
         self.lift.lift(0)
-        self.arm.tilt(55)
-        self.arm.wrist(-55)
+        self.arm.tilt(77)
+        self.arm.wrist(-77)
         
         if self.zeroed():
             self.next_state('idle')
@@ -152,7 +152,7 @@ class LiftControl(StateMachine):
         self.lift.lift(46)
         self.arm.tilt(0)
         self.arm.wrist(34)
-        self.claw.wrist(170)
+        self.claw.wrist(150)
         
         if self.zeroed():
             self.next_state('idle')

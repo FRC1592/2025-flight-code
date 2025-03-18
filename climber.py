@@ -47,3 +47,6 @@ class Climber:
 
     def set_climb(self, speed):
         self.climb_cmd = speed
+        
+    def homed(self):
+        return self.d_home.get()

@@ -23,12 +23,16 @@ class Claw:
         config.closedLoop.setFeedbackSensor(config.closedLoop.FeedbackSensor.kPrimaryEncoder)
         self.s_claw_wrist.configure(config, rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         self._rad2rev = 80 / units.radians(2 * math.pi)
+        # pid_cfg = rev.ClosedLoopConfig()
+        # pid_cfg.P(1.0, rev.ClosedLoopSlot.kSlot0)
+        # self.s_claw_wrist.configure(rev.ClosedLoopConfig().P(1.0, rev.ClosedLoopSlot.kSlot0), rev.SparkMax.ResetMode.kNoResetSafeParameters, rev.SparkMax.PersistMode.kNoPersistParameters)
         
         
 
     def execute(self):
         self.wrist_state = self.s_claw_wrist.getEncoder().getPosition() / self._rad2rev
         self.s_claw_wrist.getClosedLoopController().setReference(self.wrist_cmd * self._rad2rev, rev.SparkLowLevel.ControlType.kPosition)
+        # self.s_claw_wrist.getClosedLoopController().setReference(self.wrist_cmd * self._rad2rev, rev.SparkLowLevel.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0, self.plz_mommy, rev.SparkClosedLoopController.ArbFFUnits.kPercentOut)
         
         self.s_claw_gather.set(self.gather_cmd)
 
@@ -43,7 +47,7 @@ class Claw:
         self.gather_cmd = -0.75
         
     def hold(self):
-        self.gather_cmd = 0.5
+        self.gather_cmd = 0.75
 
     def stop(self):
         self.gather_cmd = 0.0

@@ -11,8 +11,9 @@ from climber_control import ClimberControl
 import rev
 from phoenix6 import hardware
 import navx
-import ntcore
+from vision import Vision
 from robotpy_ext.autonomous import AutonomousModeSelector
+from april_constants import AprilConstants
 
 class MyRobot(magicbot.MagicRobot):
 
@@ -21,10 +22,13 @@ class MyRobot(magicbot.MagicRobot):
     arm : Arm
     claw : Claw
     climber : Climber
+    vision : Vision
 
     chassis_control : ChassisControl
     lift_control : LiftControl
     climber_control : ClimberControl
+    
+    april_constants : AprilConstants
     
     holding = False
     clinging = False
@@ -72,7 +76,7 @@ class MyRobot(magicbot.MagicRobot):
         
         self.automodes = AutonomousModeSelector("autonomous")
 
-        self.nt = ntcore.NetworkTableInstance.getDefault().getTable('limelight')
+        # self.nt = ntcore.NetworkTableInstance.getDefault().getTable('limelight')
         
     def teleopInit(self):
         #Chassis
@@ -82,28 +86,23 @@ class MyRobot(magicbot.MagicRobot):
         self.lift_control.request_state('stop')
 
     def teleopPeriodic(self):
-        #Chassis
-        chassis_state = None
-        
-        if self._j_driver.getStartButton():
-            self.chassis.zero_gyro()
-
-        self.chassis_control.request_state(chassis_state)
-        
-        #Lift, arm, and claw
+        # chassis_state = None
         lift_state = None
         climber_state = None
         
+        if self._j_driver.getStartButton():
+            self.chassis.zero_gyro()
+        
         #Driver Controls
         if self._j_driver.getAButtonPressed():
-            lift_state = 'gather_coral'
+            self.arm.gather()
         if self._j_driver.getAButtonReleased():
-            lift_state = 'stop'
+            self.arm.stop()
             
         if self._j_driver.getBButtonPressed():
-            lift_state = 'eject_coral'
+            self.arm.eject()
         if self._j_driver.getBButtonReleased():
-            lift_state = 'stop'
+            self.arm.stop()
             
         if self._j_driver.getXButton():
             lift_state = 'stow_claw'
@@ -125,7 +124,8 @@ class MyRobot(magicbot.MagicRobot):
             lift_state = 'high_eject'
 
         if self._j_driver.getLeftTriggerAxis() > 0.5:
-            climber_state = 'home'
+            if not self.climber.homed():
+                climber_state = 'home'
         if self._j_driver.getLeftTriggerAxis() < 0.5:
             if not self.extending:
                 climber_state = 'stop'
@@ -135,6 +135,15 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_driver.getLeftBumperReleased():
             climber_state = 'stop'
             self.extending = False
+            
+        if self._j_driver.getLeftStickButton():
+            pass
+            # self.chassis_control.request_state('drive_lineup')
+            # self.chassis_control.align_with_tag(7, 1)
+        if self._j_driver.getRightStickButton():
+            pass
+            # self.chassis_control.request_state('drive_lineup')
+            # self.chassis_control.align_with_tag(7, 2)
 
         #Manipulator Controls
         if self._j_manip.getAButton():
@@ -166,6 +175,7 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_manip.getStartButton():
             lift_state = 'flick_algae'
 
+        # self.chassis_control.request_state(chassis_state)
         self.lift_control.request_state(lift_state)
         self.climber_control.request_state(climber_state)
         
@@ -174,3 +184,5 @@ class MyRobot(magicbot.MagicRobot):
         self.climber_control.engage()
         
         self.chassis_control.update_joysticks(self._j_driver.getLeftX(), self._j_driver.getLeftY(), self._j_driver.getRightX())
+        
+        # print(str(self.chassis.update_pose()))

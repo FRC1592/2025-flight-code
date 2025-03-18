@@ -1,0 +1,52 @@
+from magicbot import state, timed_state
+
+from magicbot import AutonomousStateMachine
+
+from chassis_control import ChassisControl
+from lift_control import LiftControl
+from climber_control import ClimberControl
+from vision import Vision
+from april_constants import AprilConstants
+from chassis import Chassis
+
+
+class Score1Coral(AutonomousStateMachine):
+    MODE_NAME = 'Score 1 Coral'
+
+    chassis_control : ChassisControl
+    lift_control : LiftControl
+    climber_control : ClimberControl
+    vision : Vision
+    april_constants : AprilConstants
+    chassis : Chassis
+
+    def initialize(self):
+        self.chassis.zero_gyro()
+        self.chassis_control.request_state('drive_gyro')
+        
+    @timed_state(duration=2.0, next_state='approach_tag', first=True)
+    def raise_lift(self):
+        self.chassis_control.request_state('drive_gyro')
+        self.chassis_control.drive_hold_heading(0, 0, 0)
+        self.lift_control.request_state('stow_pos')
+
+    @timed_state(duration=3.0, next_state='stop')
+    def approach_tag(self):
+        self.chassis_control.request_state('drive_gyro')
+        self.chassis_control.drive_df(0, 1, 0, 3.0)
+
+    @state
+    def stop(self):
+        self.chassis_control.update_joysticks(0, 0, 0)
+        self.next_state('auto_done')
+
+    @state
+    def auto_done(self):
+        self.chassis_control.update_joysticks(0, 0, 0)
+
+    def on_iteration(self, tm):
+        self.chassis_control.engage()
+        self.lift_control.engage()
+        self.climber_control.engage()
+
+        super().on_iteration(tm)

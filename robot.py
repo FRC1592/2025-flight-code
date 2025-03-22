@@ -33,6 +33,7 @@ class MyRobot(magicbot.MagicRobot):
     holding = False
     clinging = False
     extending = False
+    povd = False
 
     def createObjects(self):
         self._j_driver : wpilib.XboxController = wpilib.XboxController(0)
@@ -86,12 +87,14 @@ class MyRobot(magicbot.MagicRobot):
         self.lift_control.request_state('stop')
 
     def teleopPeriodic(self):
-        # chassis_state = None
+        chassis_state = None
         lift_state = None
         climber_state = None
         
         if self._j_driver.getStartButton():
             self.chassis.zero_gyro()
+        
+        self.chassis_control.request_state(chassis_state)
         
         #Driver Controls
         if self._j_driver.getAButtonPressed():
@@ -105,15 +108,15 @@ class MyRobot(magicbot.MagicRobot):
             self.arm.stop()
             
         if self._j_driver.getXButton():
-            lift_state = 'stow_claw'
+            self.lift_control.next_state('stow_pos')
             
         if self._j_driver.getYButton():
-            lift_state = 'scoop_algae'
+            self.lift_control.next_state('med_pos')
         
         if self._j_driver.getRightBumper():
             lift_state = 'floor_pos'
         if self._j_driver.getRightTriggerAxis() > 0.5:
-            self.claw.gather()
+            self.claw.eject()
             self.clinging = True
         if self._j_driver.getRightTriggerAxis() < 0.5:
             if self.clinging:
@@ -123,6 +126,7 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_driver.getBackButton():
             lift_state = 'high_eject'
 
+        # self._j_driver.setRumble(wpilib.XboxController.RumbleType.kBothRumble, 0.0)
         if self._j_driver.getLeftTriggerAxis() > 0.5:
             if not self.climber.homed():
                 climber_state = 'home'
@@ -132,16 +136,41 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_driver.getLeftBumperPressed():
             climber_state = 'extend'
             self.extending = True
+            # print(str(self.climber_control._requested_state))
+            # if str(self.climber_control._requested_state) == 'do_extend':
+            #     self._j_driver.setRumble(wpilib.XboxController.RumbleType.kBothRumble, 1.0)
         if self._j_driver.getLeftBumperReleased():
             climber_state = 'stop'
             self.extending = False
             
-        if self._j_driver.getLeftStickButton():
-            pass
+        # if self._j_driver.getXButtonPressed():
+        #     climber_state = 'extend'
+        #     self.extending = True
+        # if self._j_driver.getXButtonReleased():
+        #     climber_state = 'stop'
+        #     self.extending = False
+            
+        if self._j_driver.getPOV() == 0:
+            if not self.povd:
+                self.lift_control.gather_angle -= 1
+                self.povd = True
+                lift_state = 'gather_pos'
+        
+        if self._j_driver.getPOV() == 180:
+            if not self.povd:
+                self.lift_control.gather_angle += 1
+                self.povd = True
+                lift_state = 'gather_pos'
+        
+        if self._j_driver.getPOV() == -1:
+            self.povd = False
+            
+        # if self._j_driver.getLeftStickButton():
+        #     pass
             # self.chassis_control.request_state('drive_lineup')
             # self.chassis_control.align_with_tag(7, 1)
-        if self._j_driver.getRightStickButton():
-            pass
+        # if self._j_driver.getRightStickButton():
+        #     pass
             # self.chassis_control.request_state('drive_lineup')
             # self.chassis_control.align_with_tag(7, 2)
 

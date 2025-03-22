@@ -10,7 +10,7 @@ class LiftControl(StateMachine):
     arm : Arm
     claw : Claw
 
-    plz_daddy = tunable(31.0)
+    gather_angle = -44
 
     def __init__(self):
         self._requested_state = None
@@ -24,7 +24,7 @@ class LiftControl(StateMachine):
     @state 
     def stow_pos(self):
         self.lift.lift(0)
-        self.arm.tilt(0)
+        self.arm.tilt(8)
         self.arm.wrist(0)
         self.claw.wrist(0)
         
@@ -34,7 +34,7 @@ class LiftControl(StateMachine):
     @timed_state(duration=0.5, next_state='claw_prep')
     def floor_pos(self):
         self.lift.lift(20)
-        self.arm.tilt(0)
+        self.arm.tilt(8)
         self.arm.wrist(0)
         self.claw.wrist(90)
     
@@ -74,12 +74,12 @@ class LiftControl(StateMachine):
     @state
     def processor_pos(self):
         self.lift.lift(8)
-        self.arm.tilt(0)
+        self.arm.tilt(8)
         self.arm.wrist(0)
         self.claw.wrist(121)
         
         if self.zeroed():
-            self.next_state('idle')
+            self.next_state('zero_arm')
             
     @state
     def flick_algae(self):
@@ -93,7 +93,7 @@ class LiftControl(StateMachine):
     def gather_pos(self):
         self.lift.lift(4)
         self.arm.tilt(17)
-        self.arm.wrist(-45)
+        self.arm.wrist(self.gather_angle)
         self.claw.wrist(0)
         
         if self.zeroed():
@@ -111,21 +111,21 @@ class LiftControl(StateMachine):
     @state
     def low_pos(self):
         self.lift.lift(5)
-        self.arm.tilt(0)
+        self.arm.tilt(15)
         self.arm.wrist(20)
         
         if self.zeroed():
-            self.next_state('idle')
+            self.next_state('zero_arm')
             
     @state
     def med_pos(self):
         self.lift.lift(18)
-        self.arm.tilt(0)
+        self.arm.tilt(15)
         self.arm.wrist(22)
         self.claw.wrist(70)
         
         if self.zeroed():
-            self.next_state('idle')
+            self.next_state('zero_arm')
     
     @timed_state(duration=0.3, next_state='wunadeez')
     def high_eject(self):
@@ -150,9 +150,16 @@ class LiftControl(StateMachine):
     @state
     def high_pos(self):
         self.lift.lift(46)
-        self.arm.tilt(0)
+        self.arm.tilt(15)
         self.arm.wrist(34)
         self.claw.wrist(150)
+        
+        if self.zeroed():
+            self.next_state('zero_arm')
+            
+    @state
+    def zero_arm(self):
+        self.arm.tilt(0)
         
         if self.zeroed():
             self.next_state('idle')

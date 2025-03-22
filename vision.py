@@ -19,15 +19,16 @@ class Vision:
         # self.tag_offset_distance = 0
 
     def execute(self):
+        pass
         #forward/backward
-        self.tx = self.getData(0)
+        # self.tx = self.getData(0)
         #side/side
-        self.ty = self.getData(1)
-        self.area = self.getData(10)
-        self.distance = self.getData(9)
-        self.tag_ct = self.getData(11)
-        self.tag_offset_angle = self.getData(5)
-        self.tag_offset_pos = self.getData(12)
+        # self.ty = self.getData(1)
+        # self.area = self.getData(10)
+        # self.distance = self.getData(9)
+        # self.tag_ct = self.getData(11)
+        # self.tag_offset_angle = self.getData(5)
+        # self.tag_offset_pos = self.getData(12)
         # self.tag_offset_distance = self.getData(15)
         
     def getData(self, point):

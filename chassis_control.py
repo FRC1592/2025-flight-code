@@ -14,11 +14,11 @@ class ChassisControl(StateMachine):
     h_i = tunable(0.0)
     h_d = tunable(0.0001)
     
-    forward = tunable(0.0)
-    left = tunable(0.0)
-    d_p = tunable(1.0)
-    d_i = tunable(0.0)
-    d_d = tunable(0.0001)
+    # forward = tunable(0.0)
+    # left = tunable(0.0)
+    # d_p = tunable(1.0)
+    # d_i = tunable(0.0)
+    # d_d = tunable(0.0001)
 
     def __init__(self):
         self._heading_pid : controller.PIDController = controller.PIDController(0.1, 0, 0.0001)
@@ -26,9 +26,9 @@ class ChassisControl(StateMachine):
         self._heading_pid.enableContinuousInput(-180, 180)
         self._heading_pid.setIntegratorRange(-1.0, 1.0)
         
-        self._driving_pid : controller.PIDController = controller.PIDController(0.1, 0, 0.0001)
-        self._driving_pid.setTolerance(5)
-        self._driving_pid.setIntegratorRange(-1.0, 1.0)
+        # self._driving_pid : controller.PIDController = controller.PIDController(0.1, 0, 0.0001)
+        # self._driving_pid.setTolerance(5)
+        # self._driving_pid.setIntegratorRange(-1.0, 1.0)
         
         self._requested_state = None
         

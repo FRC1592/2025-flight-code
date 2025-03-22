@@ -37,4 +37,4 @@ class Lift:
 
     def lifted(self):
         max_err = units.inches(1) * self._inch2rev
-        return self.lift_state < max_err
+        return abs(self.s_lift_left.getEncoder().getPosition() - self.lift_cmd * self._inch2rev) < max_err and abs(self.s_lift_right.getEncoder().getPosition() - self.lift_cmd * self._inch2rev) < max_err

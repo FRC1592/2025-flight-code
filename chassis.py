@@ -35,9 +35,9 @@ class Chassis:
     
     gyro_state = tunable(0.0)
     
-    x_state = tunable(0.0)
-    y_state = tunable(0.0) 
-    t_state = tunable(0.0)
+    # x_state = tunable(0.0)
+    # y_state = tunable(0.0) 
+    # t_state = tunable(0.0)
 
     def __init__(self):
         self._turns : List[rev.SparkMax]
@@ -64,7 +64,7 @@ class Chassis:
                 lb_pod_location,
                 rb_pod_location)
         
-        self.field = Field2d()
+        # self.field = Field2d()
         
         # self.odometry = SwerveDrive4Odometry(self._kinematics, self.gyro.getRotation2d(), (self.getPosition(0), self.getPosition(1), self.getPosition(2), self.getPosition(3)))
 
@@ -74,9 +74,9 @@ class Chassis:
         self._drives = [self.f_lf_drive, self.f_rf_drive, self.f_lb_drive, self.f_rb_drive]
         self._turns = [self.s_lf_turn, self.s_rf_turn, self.s_lb_turn, self.s_rb_turn]
         
-        self.odometry = SwerveDrive4Odometry(self._kinematics, Rotation2d.fromDegrees(-self.gyro.getAngle()), (self.getPosition(0), self.getPosition(1), self.getPosition(2), self.getPosition(3)))
+        # self.odometry = SwerveDrive4Odometry(self._kinematics, Rotation2d.fromDegrees(-self.gyro.getAngle()), (self.getPosition(0), self.getPosition(1), self.getPosition(2), self.getPosition(3)))
 
-        self.pose = self.update_pose()
+        # self.pose = self.update_pose()
 
         self.configure_pods()
 
@@ -95,20 +95,24 @@ class Chassis:
 
     def zero_gyro(self):
         self.gyro.zeroYaw()
-        # self.gyro.setAngleAdjustment(180)
+        self.gyro.setAngleAdjustment(180)
+        
+    def zero_pods(self):
+        for turn in self._turns:
+            turn.getClosedLoopController().setReference(0, rev.SparkLowLevel.ControlType.kPosition)
     
-    def get_gyro(self) -> Rotation2d:
-        return Rotation2d.fromDegrees(-self.gyro.getAngle())
+    # def get_gyro(self) -> Rotation2d:
+    #     return Rotation2d.fromDegrees(-self.gyro.getAngle())
     
-    def update_pose(self) -> Pose2d:
-        pose = self.odometry.update(self.get_gyro(), (self.getPosition(0), self.getPosition(1), self.getPosition(2), self.getPosition(3)))
-        return pose
+    # def update_pose(self) -> Pose2d:
+    #     pose = self.odometry.update(self.get_gyro(), (self.getPosition(0), self.getPosition(1), self.getPosition(2), self.getPosition(3)))
+    #     return pose
 
-    def getPosition(self, pod : int) -> SwerveModulePosition:
-        return SwerveModulePosition(
-            self.get_drive_position(pod),
-            self.get_pod_angle(pod),
-        )
+    # def getPosition(self, pod : int) -> SwerveModulePosition:
+    #     return SwerveModulePosition(
+    #         self.get_drive_position(pod),
+    #         self.get_pod_angle(pod),
+    #     )
 
     def drive(self, speeds : ChassisSpeeds):
         self._speeds = speeds
@@ -121,7 +125,7 @@ class Chassis:
             forward,
             left,
             theta,
-            Rotation2d.fromDegrees(self.gyro.getAngle()))
+            Rotation2d.fromDegrees(-self.gyro.getAngle()))
 
         self.drive(speeds)
 
@@ -143,9 +147,9 @@ class Chassis:
         angle = units.degrees(self._turns[pod].getAbsoluteEncoder().getPosition())
         return Rotation2d.fromDegrees(angle)
     
-    def get_drive_position(self, pod: int) -> units.meters:
-        _rev2met = math.pi * (0.09906 / 6.12)
-        return units.meters(self._drives[pod].get_position().value * _rev2met)
+    # def get_drive_position(self, pod: int) -> units.meters:
+    #     _rev2met = math.pi * (0.09906 / 6.12)
+    #     return units.meters(self._drives[pod].get_position().value * _rev2met)
 
     def _set_pod(self, pod : int, command : SwerveModuleState):
         drive_percent = command.speed / self._max_speed
@@ -165,11 +169,11 @@ class Chassis:
 
         self.gyro_state = (self.gyro.getAngle() + 180) % 360 - 180
         
-        self.pose = self.update_pose()
-        self.x_state = self.pose.x
-        self.y_state = self.pose.y
-        self.t_state = self.pose.rotation().degrees()
-        self.field.setRobotPose(self.pose)
+        # self.pose = self.update_pose()
+        # self.x_state = self.pose.x
+        # self.y_state = self.pose.y
+        # self.t_state = self.pose.rotation().degrees()
+        # self.field.setRobotPose(self.pose)
 
 
 

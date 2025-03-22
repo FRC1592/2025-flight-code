@@ -20,16 +20,16 @@ class ClimberControl(StateMachine):
         # if self._requested_state == 'stop':
             self.next_state('stop')
 
-    @timed_state(duration=0.2, next_state='extend_bump')
+    @timed_state(duration=0.1, next_state='extend_bump')
     def extend(self):
         self.climber.release_extend()
         
         if self._requested_state == 'stop':
             self.next_state('stop')
 
-    @timed_state(duration=0.3, next_state='do_extend')
+    @timed_state(duration=0.5, next_state='do_extend')
     def extend_bump(self):
-        self.climber.set_climb(0.1)
+        self.climber.set_climb(0.15)
 
         if self._requested_state == 'stop':
             self.next_state('stop')

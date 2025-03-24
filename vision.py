@@ -32,7 +32,7 @@ class Vision:
         # self.tag_offset_distance = self.getData(15)
         
     def getData(self, point):
-        if len(self.nt.getNumberArray('botpose_wpiblue', [-1.0] * 11)) > 11:
+        if len(self.nt.getNumberArray('botpose_wpiblue', [-1.0] * 11)) >= 11:
             return self.nt.getNumberArray('botpose_wpiblue', [-1.0] * 11)[point]
         else:
             return 0

@@ -38,6 +38,7 @@ class Arm:
         
         self.wrist_state = self.s_arm_wrist.getEncoder().getPosition() / self.w_rad2rev
         self.s_arm_wrist.getClosedLoopController().setReference(self.wrist_cmd * self.w_rad2rev, rev.SparkLowLevel.ControlType.kPosition)
+        # self.s_arm_wrist.getClosedLoopController().setReference(self.wrist_cmd * self.w_rad2rev, rev.SparkLowLevel.ControlType.kPosition, arbFeedforward=1.0, arbFFUnits=rev.SparkClosedLoopController.ArbFFUnits.kPercentOut)
         
         self.s_arm_gather.set(self.gather_cmd)
 

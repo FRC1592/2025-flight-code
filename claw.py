@@ -33,6 +33,8 @@ class Claw:
         self.wrist_state = self.s_claw_wrist.getEncoder().getPosition() / self._rad2rev
         self.s_claw_wrist.getClosedLoopController().setReference(self.wrist_cmd * self._rad2rev, rev.SparkLowLevel.ControlType.kPosition)
         # self.s_claw_wrist.getClosedLoopController().setReference(self.wrist_cmd * self._rad2rev, rev.SparkLowLevel.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0, self.plz_mommy, rev.SparkClosedLoopController.ArbFFUnits.kPercentOut)
+        # self.s_claw_wrist.getClosedLoopController().setReference(self.wrist_cmd * self._rad2rev, rev.SparkLowLevel.ControlType.kPosition, arbFeedforward=0.1, arbFFUnits=rev.SparkClosedLoopController.ArbFFUnits.kPercentOut)
+        
         
         self.s_claw_gather.set(self.gather_cmd)
 

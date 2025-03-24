@@ -37,10 +37,15 @@ class CoralRightSide(AutonomousStateMachine):
         self.chassis_control.request_state('drive_gyro')
         self.chassis_control.drive_df(0, -7.5, 60, 5.0)
         
-    @timed_state(duration=1.0, next_state='score')
+    @timed_state(duration=1.7, next_state='reverse')
     def left_to_tag(self):
         self.chassis_control.request_state('drive_gyro')
-        self.chassis_control.drive_df(3, 0, 60, 1.0)
+        self.chassis_control.drive_df(3, 0, 60, 1.7)
+        
+    @timed_state(duration=0.3, next_state='score')
+    def reverse(self):
+        self.chassis_control.request_state('drive_gyro')
+        self.chassis_control.drive_df(-0.2, 0, 60, 0.3)
         
     @timed_state(duration=0.7, next_state='back_up')
     def score(self):

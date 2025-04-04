@@ -146,6 +146,57 @@ class LiftControl(StateMachine):
         
         if self.zeroed():
             self.next_state('idle')
+            
+    @timed_state(duration=0.35, next_state='mid_barge')
+    def barge_shot(self):
+        self.lift.lift(46)
+        self.arm.tilt(8)
+        self.arm.wrist(0)
+        self.claw.wrist(121)
+        self.claw.hold()
+    
+    @timed_state(duration=0.75, next_state='barge_hold')
+    def mid_barge(self):
+        self.lift.lift(46)
+        self.arm.tilt(4)
+        self.arm.wrist(0)
+        self.claw.wrist(70)
+        self.claw.hold()
+    
+    @timed_state(duration=0.6, next_state='barge_shoot')
+    def barge_hold(self):
+        self.lift.lift(46)
+        self.arm.tilt(-40)
+        self.arm.wrist(0)
+        self.claw.wrist(45)
+        self.claw.hold()
+    
+    @timed_state(duration=0.3, next_state='finish_barge')
+    def barge_shoot(self):
+        self.lift.lift(46)
+        self.arm.tilt(-40)
+        self.arm.wrist(0)
+        self.claw.wrist(45)
+        self.claw.eject()
+    
+    @state
+    def finish_barge(self):
+        self.claw.stop()
+        self.arm.tilt(0)
+        self.arm.wrist(0)
+        
+        if self.zeroed():
+            self.next_state('idle')
+            
+    @state
+    def barge_pos(self):
+        self.lift.lift(46)
+        self.arm.tilt(15)
+        self.arm.wrist(0)
+        self.claw.wrist(65)
+        
+        if self.zeroed():
+            self.next_state('zero_arm')
 
     @state
     def high_pos(self):

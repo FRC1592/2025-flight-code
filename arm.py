@@ -16,8 +16,8 @@ class Arm:
     wrist_cmd = tunable(0.0)
     gather_cmd = tunable(0.0)
     
-    tilt_limit = tunable(90.0)
-    wrist_limit = tunable(90.0)
+    tilt_limit = tunable(180.0)
+    wrist_limit = tunable(180.0)
 
     def setup(self):
         self.s_arm_tilt.IdleMode(rev.SparkMax.IdleMode.kBrake)
@@ -53,6 +53,9 @@ class Arm:
     def gather(self):
         self.gather_cmd = 1.0
 
+    def hold(self):
+        self.gather_cmd = 0.3
+    
     def eject(self):
         self.gather_cmd = -1.0
 

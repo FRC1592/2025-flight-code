@@ -2,6 +2,7 @@ from magicbot import state, timed_state
 
 from magicbot import AutonomousStateMachine
 
+from arm import Arm
 from chassis_control import ChassisControl
 from lift_control import LiftControl
 from climber_control import ClimberControl
@@ -13,6 +14,7 @@ from chassis import Chassis
 class CoralStay(AutonomousStateMachine):
     MODE_NAME = 'Coral Stay'
 
+    arm : Arm
     chassis_control : ChassisControl
     lift_control : LiftControl
     climber_control : ClimberControl
@@ -21,11 +23,12 @@ class CoralStay(AutonomousStateMachine):
     def initialize(self):
         self.chassis_control.request_state('drive_gyro')
         
-    @timed_state(duration=1.0, next_state='raise_lift', first=True)
+    @timed_state(duration=1.5, next_state='raise_lift', first=True)
     def fix_arm(self):
         self.chassis_control.request_state('drive_gyro')
         self.chassis_control.drive_hold_heading(0, 0, 0)
-        self.chassis.zero_pods()
+        self.arm.hold()
+        # self.chassis.zero_pods()
         self.lift_control.request_state('stow_pos')
         
     @timed_state(duration=2.0, next_state='approach_tag')
@@ -38,6 +41,7 @@ class CoralStay(AutonomousStateMachine):
     def approach_tag(self):
         self.chassis_control.request_state('drive_gyro')
         self.chassis_control.drive_df(0, -5, 0, 2.0)
+        self.arm.stop()
         
     @timed_state(duration=0.7, next_state='back_up')
     def score(self):

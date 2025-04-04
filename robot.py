@@ -8,6 +8,8 @@ from claw import Claw
 from lift_control import LiftControl
 from climber import Climber
 from climber_control import ClimberControl
+from light import Light
+from light_control import LightControl
 import rev
 from phoenix6 import hardware
 import navx
@@ -23,10 +25,12 @@ class MyRobot(magicbot.MagicRobot):
     claw : Claw
     climber : Climber
     vision : Vision
+    light : Light
 
     chassis_control : ChassisControl
     lift_control : LiftControl
     climber_control : ClimberControl
+    light_control : LightControl
     
     april_constants : AprilConstants
     
@@ -34,6 +38,7 @@ class MyRobot(magicbot.MagicRobot):
     clinging = False
     extending = False
     povd = False
+    barging = False
 
     def createObjects(self):
         self._j_driver : wpilib.XboxController = wpilib.XboxController(0)
@@ -71,7 +76,7 @@ class MyRobot(magicbot.MagicRobot):
         self.s_claw_gather = rev.SparkMax(31, rev.SparkLowLevel.MotorType.kBrushless)
         
         # #Cimber Motor
-        self.r_lock = wpilib.Relay(0)
+        self.r_lock = wpilib.Relay(1)
         self.s_climb = rev.SparkMax(40, rev.SparkLowLevel.MotorType.kBrushed)
         self.d_home = wpilib.DigitalInput(0)
         
@@ -85,30 +90,74 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_control.request_state('drive_with_joysticks')
         self.chassis_control.update_joysticks(0, 0, 0)
         self.lift_control.request_state('stop')
+        
+        # # self.light_control.request_state('turn_on')
+        # self.light.darken()
 
     def teleopPeriodic(self):
         chassis_state = None
         lift_state = None
         climber_state = None
+        # light_state = None
         
         if self._j_driver.getStartButton():
             self.chassis.zero_gyro()
+        
+        # if self._j_driver.getLeftStickButtonPressed():
+        #     if not self.vision.blind():
+        #         self.chassis_control.righty = False
+        #         self.chassis_control.current_x = self.vision.getX()
+        #         self.chassis_control.current_y = self.vision.getY()
+                
+        #         # self.chassis_control.target_x = self.april_constants.tagx[round(self.vision.getClosestTag())]
+        #         # self.chassis_control.target_y = self.april_constants.tagy[round(self.vision.getClosestTag())]
+                
+        #         chassis_state = 'drive_april_tag'
+        #     else:
+        #         chassis_state = 'drive_with_joysticks'
+        # if self._j_driver.getLeftStickButtonReleased():
+        #     chassis_state = 'drive_with_joysticks'
+            
+        # if self._j_driver.getRightStickButtonPressed():
+        #     if not self.vision.blind():
+        #         self.chassis_control.righty = True
+        #         self.chassis_control.current_x = self.vision.getX()
+        #         self.chassis_control.current_y = self.vision.getY()
+                
+        #         # self.chassis_control.target_x = self.april_constants.tagxr[round(self.vision.getClosestTag())]
+        #         # self.chassis_control.target_y = self.april_constants.tagyr[round(self.vision.getClosestTag())]
+                
+        #         chassis_state = 'drive_april_tag'
+        #     else:
+        #         chassis_state = 'drive_with_joysticks'
+        # if self._j_driver.getRightStickButtonReleased():
+        #     chassis_state = 'drive_with_joysticks'
+            
         
         self.chassis_control.request_state(chassis_state)
         
         #Driver Controls
         if self._j_driver.getAButtonPressed():
             self.arm.gather()
+            # self.light.greenen()
         if self._j_driver.getAButtonReleased():
             self.arm.stop()
+            # self.light.darken()
             
         if self._j_driver.getBButtonPressed():
             self.arm.eject()
         if self._j_driver.getBButtonReleased():
             self.arm.stop()
+            # self.light.darken()
             
-        if self._j_driver.getXButton():
-            self.lift_control.next_state('stow_pos')
+        # if self._j_driver.getXButton():
+            # self.lift_control.next_state('stow_pos')
+            # lift_state = 'barge_pos'
+            
+        if self._j_driver.getXButtonPressed():
+            self.barging = True
+        if self._j_driver.getXButtonReleased():
+            self.barging = False
             
         if self._j_driver.getYButton():
             self.lift_control.next_state('med_pos')
@@ -133,15 +182,14 @@ class MyRobot(magicbot.MagicRobot):
         if self._j_driver.getLeftTriggerAxis() < 0.5:
             if not self.extending:
                 climber_state = 'stop'
-        if self._j_driver.getLeftBumperPressed():
+        if self._j_driver.getLeftBumper():
             climber_state = 'extend'
-            self.extending = True
-            # print(str(self.climber_control._requested_state))
-            # if str(self.climber_control._requested_state) == 'do_extend':
-            #     self._j_driver.setRumble(wpilib.XboxController.RumbleType.kBothRumble, 1.0)
-        if self._j_driver.getLeftBumperReleased():
-            climber_state = 'stop'
-            self.extending = False
+        #     self.extending = True
+        #     self.climber.release_extend()
+        #     self.r_lock.set(wpilib.Relay.Value.kForward)
+        # if self._j_driver.getLeftBumperReleased():
+        #     climber_state = 'stop'
+        #     self.extending = False
             
         # if self._j_driver.getXButtonPressed():
         #     climber_state = 'extend'
@@ -198,15 +246,18 @@ class MyRobot(magicbot.MagicRobot):
             if self.holding:
                 self.claw.stop()
                 self.holding = False
+                if self.barging:
+                    lift_state = 'barge_shot'
                 
         if self._j_manip.getBackButton():
-            lift_state = 'stow_pos'
+            self.lift_control.next_state('stow_pos')
         if self._j_manip.getStartButton():
             lift_state = 'flick_algae'
 
         # self.chassis_control.request_state(chassis_state)
         self.lift_control.request_state(lift_state)
         self.climber_control.request_state(climber_state)
+        # self.light_control.request_state(light_state)
         
         self.chassis_control.engage()
         self.lift_control.engage()
@@ -215,3 +266,4 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_control.update_joysticks(self._j_driver.getLeftX(), self._j_driver.getLeftY(), self._j_driver.getRightX())
         
         # print(str(self.chassis.update_pose()))
+        # print(str(self.climber._release))

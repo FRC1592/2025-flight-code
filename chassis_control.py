@@ -4,10 +4,12 @@ from wpimath import units, controller
 from chassis import Chassis
 from vision import Vision
 import phoenix6
+from april_constants import AprilConstants
 
 class ChassisControl(StateMachine):
     chassis : Chassis
     vision : Vision
+    april_constants : AprilConstants
     
     heading = tunable(0.0)
     h_p = tunable(0.01)
@@ -25,6 +27,12 @@ class ChassisControl(StateMachine):
         self._heading_pid.setTolerance(5)
         self._heading_pid.enableContinuousInput(-180, 180)
         self._heading_pid.setIntegratorRange(-1.0, 1.0)
+        
+        self.current_x = 0
+        self.current_y = 0
+        self.righty = False
+        # self.target_x = 0
+        # self.target_y = 0
         
         # self._driving_pid : controller.PIDController = controller.PIDController(0.1, 0, 0.0001)
         # self._driving_pid.setTolerance(5)
@@ -85,6 +93,9 @@ class ChassisControl(StateMachine):
         self._left = x_percent * units.feet_per_second(15.652)
         self.heading = t
         
+    def drive_to_tag(self, target):
+        self.target_x = target
+        
     # def get_duration(self, distance):
     #     return distance / self.mps
         
@@ -122,6 +133,82 @@ class ChassisControl(StateMachine):
         
         if self._requested_state is not None:
             self.next_state(self._requested_state)
+            
+    # @state
+    # def drive_april_tag(self):
+    #     if self.righty:
+    #         target_x = self.april_constants.tagxr[round(self.vision.getClosestTag())]
+    #         target_y = self.april_constants.tagyr[round(self.vision.getClosestTag())]
+    #     else:
+    #         target_x = self.april_constants.tagx[round(self.vision.getClosestTag())]
+    #         target_y = self.april_constants.tagy[round(self.vision.getClosestTag())]
+        
+    #     target_x -= self.current_x
+    #     target_y -= self.current_y
+        
+    #     theta = math.atan2(target_y, target_x)
+        
+    #     new_x = math.cos(theta) * 2
+    #     new_y = math.sin(theta) * 2
+        
+    #     self.chassis.drive_field_relative(new_x, new_y, self._theta)
+        
+    #     if self._requested_state is not None:
+    #         self.next_state(self._requested_state)
+            
+    # @state
+    # def drive_gyro_tag(self):
+    #     if self.righty:
+    #         target_x = self.april_constants.tagxr[10]
+    #         target_y = self.april_constants.tagyr[10]
+    #     else:
+    #         target_x = self.april_constants.tagxr[21]
+    #         target_y = self.april_constants.tagyr[21]
+        
+    #     target_x -= self.current_x
+    #     target_y -= self.current_y
+        
+    #     theta = math.atan2(target_y, target_x)
+        
+    #     new_x = math.cos(theta) * 2
+    #     new_y = math.sin(theta) * 2
+        
+    #     self._heading_pid.setP(self.h_p)
+    #     self._heading_pid.setI(self.h_i)
+    #     self._heading_pid.setD(self.h_d)
+    #     self._heading_pid.setSetpoint(self.heading)
+    #     h_theta = self._heading_pid.calculate(self.chassis.gyro_state)
+    #     self.err = h_theta
+        
+    #     self.chassis.drive_field_relative(new_x, -new_y, h_theta)
+        
+    #     if self._requested_state is not None:
+    #         self.next_state(self._requested_state)
+            
+    # @state
+    # def drive_align_y(self):
+    #     if self.righty:
+    #         target_y = self.april_constants.tagyr[10]
+    #     else:
+    #         target_y = self.april_constants.tagyr[21]
+        
+    #     target_y -= self.current_y
+        
+    #     theta = math.atan(target_y)
+        
+    #     new_y = math.sin(theta) * 2
+        
+    #     self._heading_pid.setP(self.h_p)
+    #     self._heading_pid.setI(self.h_i)
+    #     self._heading_pid.setD(self.h_d)
+    #     self._heading_pid.setSetpoint(self.heading)
+    #     h_theta = self._heading_pid.calculate(self.chassis.gyro_state)
+    #     self.err = h_theta
+        
+    #     self.chassis.drive_field_relative(self._forward, new_y, h_theta)
+        
+    #     if self._requested_state is not None:
+    #         self.next_state(self._requested_state)
 
     @state(first=True)
     def drive_with_joysticks(self):

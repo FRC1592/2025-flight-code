@@ -35,7 +35,7 @@ class CoralRightSide(AutonomousStateMachine):
     @timed_state(duration=5.0, next_state='left_to_tag')
     def down_to_tag(self):
         self.chassis_control.request_state('drive_gyro')
-        self.chassis_control.drive_df(0, -7.5, 60, 5.0)
+        self.chassis_control.drive_df(0, -8.05, 60, 5.0)
         
     @timed_state(duration=1.7, next_state='reverse')
     def left_to_tag(self):

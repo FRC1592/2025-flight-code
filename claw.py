@@ -46,7 +46,7 @@ class Claw:
         self.gather_cmd = 0.75
 
     def eject(self):
-        self.gather_cmd = -0.75
+        self.gather_cmd = -1.0
         
     def hold(self):
         self.gather_cmd = 0.75

@@ -26,7 +26,7 @@ class LargeLeave(AutonomousStateMachine):
     def start(self):
         self.chassis_control.request_state('drive_gyro')
         self.chassis_control.drive_hold_heading(0, 0, 0)
-        self.chassis.zero_pods()
+        # self.chassis.zero_pods()
 
     @timed_state(duration=6.0, next_state='stop')
     def leave(self):
